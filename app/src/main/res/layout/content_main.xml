@@ -13,8 +13,30 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
-        android:id="@+id/tv"
+        android:id="@+id/tvContextShow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello S!" />
+        android:text="@string/long_press_for_context_menu"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+
+    <TextView
+        android:id="@+id/tvPopUpListShow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/clickToShowPopupList"
+        android:layout_below="@+id/tvPopUpMenuShow"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="153dp" />
+
+
+    <TextView
+        android:id="@+id/tvPopUpMenuShow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/clickToShowPopup"
+        android:layout_marginTop="127dp"
+        android:layout_below="@+id/tvContextShow"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

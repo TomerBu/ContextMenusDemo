@@ -3,6 +3,7 @@ package tomerbu.edu.contextmenusdemo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -20,11 +23,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
+
     @Bind(R.id.fab)
     FloatingActionButton fab;
-    @Bind(R.id.tv)
-    TextView tv;
-    private PopupMenu popup;
+
+    @Bind(R.id.tvContextShow)
+    TextView tvContextShow;
+
+    @Bind(R.id.tvPopUpListShow)
+    TextView tvPopUpListShow;
+
+    @Bind(R.id.tvPopUpMenuShow)
+    TextView tvPopUpShow;
+
+    private PopupMenu popupMenu;
+    private ListPopupWindow listPopupWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +45,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        registerForContextMenu(tv);
 
-        popup = new PopupMenu(MainActivity.this, tv);
+        registerForContextMenu(tvContextShow);
+
+        setUpPopMenu();
+
+        setUpListPopupWindow();
+    }
+
+    private void setUpListPopupWindow() {
+        String[] items = {"One", "Two", "Three", "Four"};
+        listPopupWindow = new ListPopupWindow(getApplicationContext());
+        //A custom adapter that extends BaseAdapter (Like ListView)
+        PopUpListAdapter adapter = new PopUpListAdapter(getApplicationContext(), Arrays.asList(items));
+        listPopupWindow.setAdapter(adapter);
+
+        listPopupWindow.setOnItemClickListener(adapter);
+
+        listPopupWindow.setHeight(180 * 3);
+        listPopupWindow.setAnchorView(tvPopUpListShow);
+
+        //toggles the click to show/hide the listPopUpWindow
+        listPopupWindow.setModal(true);
+    }
+
+    private void setUpPopMenu() {
+        popupMenu = new PopupMenu(MainActivity.this, tvPopUpShow);
         //Inflating the Popup using xml file
-        popup.getMenuInflater().inflate(R.menu.pop, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        popupMenu.getMenuInflater().inflate(R.menu.pop, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.one) {
@@ -94,8 +130,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @OnClick(R.id.fab)
-    public void onClick() {
-        popup.show();
+    @OnClick(R.id.tvPopUpMenuShow)
+    public void onPopUpMenuShow() {
+        popupMenu.show();
+    }
+
+    @OnClick(R.id.tvPopUpListShow)
+    public void onPopListWindowShow() {
+        listPopupWindow.show();
     }
 }
