@@ -1,5 +1,6 @@
 package tomerbu.edu.contextmenusdemo;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 import butterknife.Bind;
@@ -101,6 +105,40 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Action 2 invoked", Toast.LENGTH_SHORT).show();
         } else if (item.getTitle() == "Action 3") {
             Toast.makeText(this, "Action 3 invoked", Toast.LENGTH_SHORT).show();
+            new AsyncTask<String, Integer, String>() {
+                @Override
+                protected String doInBackground(String... params) {
+                    String url = "https://yapi.herokuapp.com/api/upload";
+
+                    try {
+                        File file = new File(getFilesDir(), "1.txt");
+                        FileWriter writer = new FileWriter(file);
+                        writer.append("Hello ,Server");
+                        writer.flush();writer.close();
+
+                        MultipartUtility multipart = new MultipartUtility(url, "UTF-8");
+
+                        multipart.addHeaderField("User-Agent", "Java");
+                        multipart.addHeaderField("Accept-Language", "en-US,en;q=0.5");
+
+                        multipart.addFormField("Image", "My Cool Photo");
+                        multipart.addFormField("secret", "Hash, Hash");
+                        multipart.addFormField("user", "TomerBu");
+
+                        multipart.addFilePart("fileUpload", file);
+
+                        String response = multipart.finish();
+                        return response;
+                    } catch (IOException e) {
+                        return e.getMessage();
+                    }
+                }
+
+                @Override
+                protected void onPostExecute(String s) {
+                    Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+                }
+            }.execute("");
         } else {
             return false;
         }
