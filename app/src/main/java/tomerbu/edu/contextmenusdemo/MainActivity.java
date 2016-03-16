@@ -127,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
                         multipart.addFilePart("fileUpload", file);
 
-                        String response = multipart.finish();
-                        return response;
+                        return multipart.execute();
                     } catch (IOException e) {
                         return e.getMessage();
                     }

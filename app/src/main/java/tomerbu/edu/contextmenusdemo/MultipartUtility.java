@@ -1,13 +1,13 @@
 package tomerbu.edu.contextmenusdemo;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -24,7 +24,7 @@ public class MultipartUtility {
     private HttpURLConnection httpConn;
     private String charset;
     private OutputStream outputStream;
-    private PrintWriter writer;
+    private BufferedWriter writer;
 
     /**
      * This constructor initializes a new HTTP POST request with content type
@@ -44,24 +44,30 @@ public class MultipartUtility {
         URL url = new URL(requestURL);
         httpConn = (HttpURLConnection) url.openConnection();
         httpConn.setUseCaches(false);
-        httpConn.setDoOutput(true); // indicates POST method
+        httpConn.setDoOutput(true); // facilitate POST body
+        httpConn.setRequestMethod("POST");
         httpConn.setDoInput(true);
         httpConn.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
-        httpConn.setRequestProperty("User-Agent", "CodeJava Agent");
-        httpConn.setRequestProperty("Test", "Bonjour");
         outputStream = httpConn.getOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
-                true);
+        writer = new BufferedWriter(new OutputStreamWriter(outputStream, charset));
     }
 
     /**
-     * Adds a form field to the request
+     * Adds a form field to the request:
+     * here is an example:
+     *
+     * ------------------------------83ff53821b7c
+     Content-Disposition: form-data; name="userName";
+     Content-Type: text/plain; charset=UTF-8
+
+     TomerBu
+
      *
      * @param name  field name
      * @param value field value
      */
-    public void addFormField(String name, String value) {
+    public void addFormField(String name, String value)  throws IOException {
         writer.append("--").append(boundary).append(LINE_FEED);
         writer.append("Content-Disposition: form-data; name=\"").append(name).append("\"")
                 .append(LINE_FEED);
@@ -73,8 +79,15 @@ public class MultipartUtility {
     }
 
     /**
-     * Adds a upload file section to the request
+     * Adds a upload file section to the request:
+     * here is an example:
      *
+     * ------------------------------83ff53821b7c
+     Content-Disposition: form-data; name="myImage"; filename="test.png"
+     Content-Type: application/octet-stream
+
+     binary file data goes here...010101010
+
      * @param fieldName  name attribute in <input type="file" name="..." />
      * @param uploadFile a File to be uploaded
      * @throws IOException
@@ -85,7 +98,7 @@ public class MultipartUtility {
         writer.append("--").append(boundary).append(LINE_FEED);
         writer.append(
                 "Content-Disposition: form-data; name=\"").append(fieldName).append(
-                "\"; filename=\"" + fileName + "\"")
+                "\"; filename=\"").append(fileName).append("\"")
                 .append(LINE_FEED);
         writer.append(
                 "Content-Type: ")
@@ -114,7 +127,10 @@ public class MultipartUtility {
      * @param name  - name of the header field
      * @param value - value of the header field
      */
-    public void addHeaderField(String name, String value) {
+    public void addHeaderField(String name, String value) throws IOException {
+        //TODO: Test if this will work instead:
+        //TODO: httpConn.setRequestProperty(name, value);
+
         writer.append(name).append(": ").append(value).append(LINE_FEED);
         writer.flush();
     }
@@ -126,11 +142,11 @@ public class MultipartUtility {
      * status is OK, otherwise an exception is thrown.
      * @throws IOException
      */
-    public String finish() throws IOException {
+    public String execute() throws IOException {
         StringBuilder builder = new StringBuilder();
 
         writer.append(LINE_FEED).flush();
-        writer.append("--" + boundary + "--").append(LINE_FEED);
+        writer.append("--").append(boundary).append("--").append(LINE_FEED);
         writer.close();
 
         // checks server's status code first
